@@ -1,18 +1,16 @@
-<mat-card>
-  <mat-card-header>Balance</mat-card-header>
+<mat-card> 
   <mat-card-content>
     <mat-form-field id="address-selector" class="address-field">
       <mat-select name="account" (selectionChange)="refreshBalance()" [(value)]="model.account" placeholder="Address">
         <mat-option *ngFor="let account of accounts" [value]="account">{{account}}</mat-option>
       </mat-select>
     </mat-form-field>
-
-    <p>You have <span id="balance">{{model.balance}}</span> Ether</p>
   </mat-card-content>
+    <p>You have <span id="balance">{{model.balance}}</span> Ether</p>
 </mat-card>
 
 <mat-card>
-  <mat-card-header>Send Ether</mat-card-header>
+  <mat-card-header><h3>Send Ether to an other user</h3></mat-card-header>
   <mat-card-content>
     <mat-form-field>
       <input type="text" matInput id="amount" placeholder="Amount" (change)="setAmount($event)">
@@ -22,6 +20,21 @@
     </mat-form-field>
     <button mat-button id="send" (click)="sendCoin()">Send Ether</button>
   </mat-card-content>
+  <mat-card-header><h3>Try Nerve</h3></mat-card-header>
+  <mat-card-content>
+    <button mat-button id="play" (click)="ShowPlayHandler=true;getDares()">Play</button>
+    <button mat-button id="watch" (click)="ShowWatchHandler=true">Watch</button>
+  </mat-card-content>
 </mat-card>
 
+<mat-card *ngIf="ShowWatchHandler">
+  watcher handler
+</mat-card>
 
+<mat-card *ngIf="ShowPlayHandler">
+  <mat-card-content>
+      <mat-select name="dares"  placeholder="choose a dare">
+          <mat-option *ngFor="let dare of dares" [value]="dare">{{dare}}</mat-option>
+        </mat-select>
+  </mat-card-content>
+</mat-card>

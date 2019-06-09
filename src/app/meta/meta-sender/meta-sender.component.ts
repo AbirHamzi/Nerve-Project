@@ -3,7 +3,8 @@ import {Web3Service} from '../../util/web3.service';
 import { MatSnackBar } from '@angular/material';
 
 declare let require: any;
-const paiementAbi = require('../../../../build/contracts/paiement.json');
+const paiementAbi = require('../../../../build/contracts/game.json');
+//const Web3 = require('web3');
 
 @Component({
   selector: 'app-meta-sender',
@@ -11,11 +12,14 @@ const paiementAbi = require('../../../../build/contracts/paiement.json');
   styleUrls: ['./meta-sender.component.css']
 })
 export class MetaSenderComponent implements OnInit {
+//  private web3: any;
   accounts: string[];
   paiementContract: any;
-
+  dares: string[];
+  dare : string;
+  NbDares: number;
   model = {
-    amount: 5,
+    amount: 0,
     receiver: '',
     balance: 0,
     account: ''
@@ -39,12 +43,36 @@ export class MetaSenderComponent implements OnInit {
           deployed.transferFund({}, (err, ev) => {
             console.log('Transfer event came in, refreshing balance');
             this.refreshBalance();
+            this.getDares();
           });
         });
 
       });
   }
+  async getDares(){
+   
+    if (!this.paiementContract) {
+      this.setStatus('Contract is not loaded, unable to send transaction');
+      return;
+    }
+    console.log('Trying to load Dares !!');
 
+   // this.setStatus('Initiating transaction... (please wait)');
+    try {
+      const deployedContract = await this.paiementContract.deployed();
+      //const NbDares = await deployedContract.getDresNumber.call();
+      this.NbDares = 4;
+      for(let i = 1; i<= this.NbDares;i++) {
+        const dare = await deployedContract.getDare.call(i);
+        this.dare = dare;
+        this.dares[i]=this.dare;
+      }
+      
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error loading dares; see log.');
+    }
+  }
   watchAccount() {
     this.web3Service.accountsObservable.subscribe((accounts) => {
       this.accounts = accounts;
@@ -59,7 +87,7 @@ export class MetaSenderComponent implements OnInit {
 
   async sendCoin() {
     if (!this.paiementContract) {
-      this.setStatus('Metacoin is not loaded, unable to send transaction');
+      this.setStatus('Contract is not loaded, unable to send transaction');
       return;
     }
 
@@ -86,14 +114,14 @@ export class MetaSenderComponent implements OnInit {
 
   async refreshBalance() {
     console.log('Refreshing balance');
-
+    
     try {
       const deployedContract = await this.paiementContract.deployed();
       console.log(deployedContract);
       console.log('Account', this.model.account);
       const SenderBalance = await deployedContract.getBalance.call();
       console.log('Found balance: ' + deployedContract);
-      this.model.balance = SenderBalance;
+      this.model.balance = SenderBalance/Math.pow(10,18);
     } catch (e) {
       console.log(e);
       this.setStatus('Error getting balance; see log.');
@@ -109,5 +137,7 @@ export class MetaSenderComponent implements OnInit {
     console.log('Setting receiver: ' + e.target.value);
     this.model.receiver = e.target.value;
   }
+
+ 
 
 }

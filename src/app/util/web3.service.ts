@@ -12,6 +12,8 @@ export class Web3Service {
   private web3: any;
   private accounts: string[];
   public ready = false;
+  public balance : number;
+  private sender : string;
 
   public accountsObservable = new Subject<string[]>();
 
@@ -75,4 +77,6 @@ export class Web3Service {
       this.ready = true;
     });
   }
+
+  
 }
