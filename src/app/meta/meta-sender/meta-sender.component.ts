@@ -48,9 +48,9 @@ export class MetaSenderComponent implements OnInit {
         });
 
       });
-      for(let i = 1; i<= 4;i++) {
+     /* for(let i = 1; i<= 4;i++) {
         this.dares[i] = 'vide';
-      }
+      }*/
   }
   async getDares(){
    
@@ -64,12 +64,12 @@ export class MetaSenderComponent implements OnInit {
     try {
       const deployedContract = await this.nerveContract.deployed();
       //const NbDares = await deployedContract.getDresNumber.call();
-      this.NbDares = 4;
-      for(let i = 1; i<= this.NbDares;i++) {
-        const dare = await deployedContract.getDare.call(i);
+     // this.NbDares = 4;
+     // for(let i = 1; i<= this.NbDares;i++) {
+        const dare = await deployedContract.getDare.call(1);
         this.dare = dare;
-        this.dares[i]=this.dare;
-      }
+        this.dares[0]=this.dare;
+     // }
       
     } catch (e) {
       console.log(e);

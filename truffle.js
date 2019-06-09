@@ -61,26 +61,26 @@ module.exports = {
 
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
-     ropsten: {
+     /*ropsten: {
        provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/256317c7d9c44370ad03d7c25356f65c`),
        network_id: 3,       // Ropsten's id
        gas: 5500000,        // Ropsten has a lower block limit than mainnet
        confirmations: 2,    // # of confs to wait between deployments. (default: 0)
        timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
        skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
-     },
+     },*/
 
     // Useful for private networks
-    // private: {
-      // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
-      // network_id: 2111,   // This network is yours, in the cloud.
-      // production: true    // Treats this network as if it was a public net. (default: false)
+     private: {
+       provider: () => new HDWalletProvider(mnemonic, `https://127.0.0.1:8545`),
+       network_id: 2111,   // This network is yours, in the cloud.
+       production: true    // Treats this network as if it was a public net. (default: false)
     // }
   },
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
-    // timeout: 100000
+     timeout: 100000
   },
 
   // Configure your compilers
@@ -97,4 +97,5 @@ module.exports = {
       // }
     }
   }
+}
 }
