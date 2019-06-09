@@ -3,7 +3,7 @@ import {Web3Service} from '../../util/web3.service';
 import { MatSnackBar } from '@angular/material';
 
 declare let require: any;
-const paiementAbi = require('../../../../build/contracts/game.json');
+const NerveAbi = require('../../../../build/contracts/game.json');
 //const Web3 = require('web3');
 
 @Component({
@@ -14,7 +14,7 @@ const paiementAbi = require('../../../../build/contracts/game.json');
 export class MetaSenderComponent implements OnInit {
 //  private web3: any;
   accounts: string[];
-  paiementContract: any;
+  nerveContract: any;
   dares: string[];
   dare : string;
   NbDares: number;
@@ -35,10 +35,10 @@ export class MetaSenderComponent implements OnInit {
     console.log('OnInit: ' + this.web3Service);
     console.log(this);
     this.watchAccount();
-    this.web3Service.artifactsToContract(paiementAbi)
+    this.web3Service.artifactsToContract(NerveAbi)
       .then((contractAbstraction) => {
-        this.paiementContract = contractAbstraction;
-        this.paiementContract.deployed().then(deployed => {
+        this.nerveContract = contractAbstraction;
+        this.nerveContract.deployed().then(deployed => {
           console.log(deployed);
           deployed.transferFund({}, (err, ev) => {
             console.log('Transfer event came in, refreshing balance');
@@ -48,10 +48,13 @@ export class MetaSenderComponent implements OnInit {
         });
 
       });
+      for(let i = 1; i<= 4;i++) {
+        this.dares[i] = 'vide';
+      }
   }
   async getDares(){
    
-    if (!this.paiementContract) {
+    if (!this.nerveContract) {
       this.setStatus('Contract is not loaded, unable to send transaction');
       return;
     }
@@ -59,7 +62,7 @@ export class MetaSenderComponent implements OnInit {
 
    // this.setStatus('Initiating transaction... (please wait)');
     try {
-      const deployedContract = await this.paiementContract.deployed();
+      const deployedContract = await this.nerveContract.deployed();
       //const NbDares = await deployedContract.getDresNumber.call();
       this.NbDares = 4;
       for(let i = 1; i<= this.NbDares;i++) {
@@ -86,7 +89,7 @@ export class MetaSenderComponent implements OnInit {
   }
 
   async sendCoin() {
-    if (!this.paiementContract) {
+    if (!this.nerveContract) {
       this.setStatus('Contract is not loaded, unable to send transaction');
       return;
     }
@@ -98,7 +101,7 @@ export class MetaSenderComponent implements OnInit {
 
     this.setStatus('Initiating transaction... (please wait)');
     try {
-      const deployedContract = await this.paiementContract.deployed();
+      const deployedContract = await this.nerveContract.deployed();
       const transaction = await deployedContract.send.sendTransaction(receiver,{from: this.model.account});
 
       if (!transaction) {
@@ -116,7 +119,7 @@ export class MetaSenderComponent implements OnInit {
     console.log('Refreshing balance');
     
     try {
-      const deployedContract = await this.paiementContract.deployed();
+      const deployedContract = await this.nerveContract.deployed();
       console.log(deployedContract);
       console.log('Account', this.model.account);
       const SenderBalance = await deployedContract.getBalance.call();
