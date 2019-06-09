@@ -34,7 +34,7 @@
 <mat-card *ngIf="ShowPlayHandler">
   <mat-card-content>
       <mat-select name="dares"  placeholder="choose a dare">
-          <mat-option *ngFor="let dare of dares" [value]="dare">{{dare}}</mat-option>
+          <mat-option *ngFor="let dare of dares">{{dare}}</mat-option>
         </mat-select>
   </mat-card-content>
 </mat-card>

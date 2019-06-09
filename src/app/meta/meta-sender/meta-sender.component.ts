@@ -63,12 +63,10 @@ export class MetaSenderComponent implements OnInit {
    // this.setStatus('Initiating transaction... (please wait)');
     try {
       const deployedContract = await this.nerveContract.deployed();
-      //const NbDares = await deployedContract.getDresNumber.call();
-     // this.NbDares = 4;
      // for(let i = 1; i<= this.NbDares;i++) {
-        const dare = await deployedContract.getDare.call(1);
-        this.dare = dare;
-        this.dares[0]=this.dare;
+        const dares = await deployedContract.getDares.call();
+        this.dares = dares;
+      
      // }
       
     } catch (e) {

@@ -8,23 +8,23 @@ contract game{
     mapping(address => Player) public playerInfo;
     
     address payable[] public watchers;
-    mapping (uint => string) Dares;
-    //string[] Dares;
+    //mapping (uint => string) Dares;
+    string[] Dares;
     event transferFund(address _sender,address _reciever,uint _amount);
 
     constructor()public {
-        Dares[1]="Eat something and then talk with your mouth full";
-        Dares[2]="Fill your mouth with water and try singing a song";
-        Dares[3]="Call up your crush and declare your love for him";
-        Dares[4]="Make an obscene phone call to a random number";
+        Dares.push("Eat something and then talk with your mouth full");
+        Dares.push("Fill your mouth with water and try singing a song");
+        Dares.push("Call up your crush and declare your love for him");
+        Dares.push("Make an obscene phone call to a random number");
     }
-  /*  function getDresNumber()public view returns(uint){
-       return Dares.length;
-    }*/
-    function getDare(uint _index)public view returns(string memory){
-      
-        return Dares[_index];
-        //return "Hello from getDares !!";
+  
+    function getDares()public view returns(string[] memory){
+      string[] memory _Dares = new string[](Dares.length);
+       for(uint i = 0; i < Dares.length; i++){
+          _Dares[i] = Dares[i];
+       }
+       return _Dares;
     }
     function getBalance() public view returns(uint){
          return (msg.sender.balance);
