@@ -37,7 +37,15 @@ contract game{
        }
        return _Dares;
     }
-  
+    function getDareKey(string memory _dare) public view returns(uint){
+     uint _key;
+        for(uint i = 0; i < DaresKeyList.length; i++){
+             _key = DaresKeyList[i];
+            if(keccak256(abi.encodePacked(Dares[_key]))==keccak256(abi.encodePacked(_dare)) )
+            break;
+        }
+        return _key;
+    }
     function getBalance() public view returns(uint){
          return (msg.sender.balance);
     }

@@ -12,12 +12,10 @@ const NerveAbi = require('../../../../build/contracts/game.json');
   styleUrls: ['./meta-sender.component.css']
 })
 export class MetaSenderComponent implements OnInit {
-//  private web3: any;
   accounts: string[];
   nerveContract: any;
   dares: string[];
-  dare : string;
-  NbDares: number;
+  key : number;
   model = {
     amount: 0,
     receiver: '',
@@ -48,27 +46,13 @@ export class MetaSenderComponent implements OnInit {
         });
 
       });
-     /* for(let i = 1; i<= 4;i++) {
-        this.dares[i] = 'vide';
-      }*/
   }
   async getDares(){
-   
-    if (!this.nerveContract) {
-      this.setStatus('Contract is not loaded, unable to send transaction');
-      return;
-    }
     console.log('Trying to load Dares !!');
-
-   // this.setStatus('Initiating transaction... (please wait)');
     try {
       const deployedContract = await this.nerveContract.deployed();
-     // for(let i = 1; i<= this.NbDares;i++) {
         const dares = await deployedContract.getDares.call();
-        this.dares = dares;
-      
-     // }
-      
+        this.dares = dares;      
     } catch (e) {
       console.log(e);
       this.setStatus('Error loading dares; see log.');
@@ -110,6 +94,17 @@ export class MetaSenderComponent implements OnInit {
     } catch (e) {
       console.log(e);
       this.setStatus('Error sending ether; see log.');
+    }
+  }
+  async getDareKey(_dare:string){
+    console.log('Trying to load Dare key !!');
+    try {
+      const deployedContract = await this.nerveContract.deployed();
+        const key = await deployedContract.getDareKey.call(_dare);
+        this.key = key;      
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error loading dares; see log.');
     }
   }
 
