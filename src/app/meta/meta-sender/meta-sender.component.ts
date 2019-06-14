@@ -16,11 +16,37 @@ export class MetaSenderComponent implements OnInit {
   nerveContract: any;
   dares: string[];
   key : number;
+  users : any;
+  pools : any;
+  Activepools : any;
   model = {
     amount: 0,
     receiver: '',
     balance: 0,
     account: ''
+  };
+  DareYouModel = {
+    PoolID : 0,
+    BetAmount: 0,
+    DareKey: 0,
+    player: ''
+  };
+  DareMeModel = {
+    PoolID : 0,
+    BetAmount: 0,
+    DareKey: 0,
+  };
+  JoinDareModel = {
+    selectedPool: 0,
+    BetAmount: 0,
+    DareKey: 0,
+    player: ''
+  };
+  DareInfoModel = {
+    NbWatchers: 0,
+    TotalAmount: 0,
+    player: '',
+    Dare : ''
   };
 
   status = '';
@@ -47,17 +73,7 @@ export class MetaSenderComponent implements OnInit {
 
       });
   }
-  async getDares(){
-    console.log('Trying to load Dares !!');
-    try {
-      const deployedContract = await this.nerveContract.deployed();
-        const dares = await deployedContract.getDares.call();
-        this.dares = dares;      
-    } catch (e) {
-      console.log(e);
-      this.setStatus('Error loading dares; see log.');
-    }
-  }
+// Detect connected accounts generated from the mnemonic
   watchAccount() {
     this.web3Service.accountsObservable.subscribe((accounts) => {
       this.accounts = accounts;
@@ -65,11 +81,21 @@ export class MetaSenderComponent implements OnInit {
       this.refreshBalance();
     });
   }
-
+// status supervisor
   setStatus(status) {
     this.matSnackBar.open(status, null, {duration: 3000});
   }
-
+// Set the reciever of sendCoin function
+  setReceiver(e) {
+    console.log('Setting receiver: ' + e.target.value);
+    this.model.receiver = e.target.value;
+  }
+// setAmount of the sendCOin function
+  setAmount(e) {
+    console.log('Setting amount: ' + e.target.value);
+    this.model.amount = e.target.value;
+  }
+/// send coins from one address to an other 
   async sendCoin() {
     if (!this.nerveContract) {
       this.setStatus('Contract is not loaded, unable to send transaction');
@@ -96,18 +122,7 @@ export class MetaSenderComponent implements OnInit {
       this.setStatus('Error sending ether; see log.');
     }
   }
-  async getDareKey(_dare:string){
-    console.log('Trying to load Dare key !!');
-    try {
-      const deployedContract = await this.nerveContract.deployed();
-        const key = await deployedContract.getDareKey.call(_dare);
-        this.key = key;      
-    } catch (e) {
-      console.log(e);
-      this.setStatus('Error loading dares; see log.');
-    }
-  }
-
+// refresh the balance of the connected account
   async refreshBalance() {
     console.log('Refreshing balance');
     
@@ -123,16 +138,182 @@ export class MetaSenderComponent implements OnInit {
       this.setStatus('Error getting balance; see log.');
     }
   }
-
-  setAmount(e) {
-    console.log('Setting amount: ' + e.target.value);
-    this.model.amount = e.target.value;
+//set the Bet Amount to play nerve
+  setBetAmount(e) {
+    console.log('Setting BetAmount: ' + e.target.value);
+    this.DareYouModel.BetAmount = e.target.value;
   }
-
-  setReceiver(e) {
-    console.log('Setting receiver: ' + e.target.value);
-    this.model.receiver = e.target.value;
+  async getDareKey(_dare:string){
+    console.log('Trying to load Dare key !!');
+    try {
+      const deployedContract = await this.nerveContract.deployed();
+        const key = await deployedContract.getDareKey.call(_dare);  
+        this.key = key; 
+        this.DareYouModel.DareKey = key; 
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error loading dares; see log.');
+    }
   }
+// set the target player of a dare
+setPlayer(address:string){
+    console.log('Setting PLayer address');
+    this.DareYouModel.player = address;
+  }
+ 
+  async getDares(){
+    console.log('Trying to load Dares !!');
+    try {
+      const deployedContract = await this.nerveContract.deployed();
+        const dares = await deployedContract.getDares.call();
+        this.dares = dares;      
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error loading dares; see log.');
+    }
+  }
+ // get subscribed users list from the blockchain 
+  async getUsers(){
+    console.log('Trying to load PLayers !!');
+    try {
+      const deployedContract = await this.nerveContract.deployed();
+        const users = await deployedContract.getUsers.call();
+        this.users = users;      
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error loading dares; see log.');
+    }
+  }
+// Create a prizepool that represents an active dare
+  async DareYou(){
+    if (!this.nerveContract) {
+      this.setStatus('Contract is not loaded, unable to send transaction');
+      return;
+    }
+    this.setStatus('Initiating transaction... (please wait)');
+    try {
+      const deployedContract = await this.nerveContract.deployed();
+      const transaction = await deployedContract.dareYou.sendTransaction(this.DareYouModel.BetAmount,this.DareYouModel.DareKey,this.DareYouModel.player,{from: this.model.account});
+      if (!transaction) {
+        this.setStatus('Transaction failed!'+transaction);
+      } else {
+        this.setStatus('Transaction complete!'+transaction);
+      }
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error creating Pool; see log.');
+    }
+  } 
+// get the list of active dares
+  async getActiveDares(){
+   console.log('Trying to load Pools !!');
+    try {
+      const deployedContract = await this.nerveContract.deployed();
+        const pools = await deployedContract.getPools.call();
+        this.pools = pools;      
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error loading pools; see log.');
+    }
+  }
+  // get the list of active dares
+  async getMyActiveDares(){
+    console.log('Trying to load Pools !!');
+     try {
+       const deployedContract = await this.nerveContract.deployed();
+         const Activepools = await deployedContract.getMyDares.call();
+         this.Activepools = Activepools;      
+     } catch (e) {
+       console.log(e);
+       this.setStatus('Error loading your active pools; see log.');
+     }
+   }
+  // select an active dare to join
+  setDareID(PoolID:number){
+    this.JoinDareModel.selectedPool = PoolID;
+ }
+ //set the Bet Amount to play nerve
+ setbetAmount(e) {
+  console.log('Setting BetAmount: ' + e.target.value);
+  this.JoinDareModel.BetAmount = e.target.value;
+}
+  async joinDare(){
+    if (!this.nerveContract) {
+      this.setStatus('Contract is not loaded, unable to send transaction');
+      return;
+    }
+    this.setStatus('Initiating transaction... (please wait)');
+    try {
+      const deployedContract = await this.nerveContract.deployed();
+      const transaction = await deployedContract.joinDare.sendTransaction(this.JoinDareModel.selectedPool,this.JoinDareModel.BetAmount,{from: this.model.account});
+    
+        if (!transaction) {
+        this.setStatus('Transaction failed!'+transaction);
+      } else {
+        this.setStatus('Transaction complete!'+transaction);
+        this.getDareInfo();
+      }
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error joining Pool; see log.');
+    }
+  }
+  async getDareInfo(){
+    console.log('Trying to load INFOs !!');
+    try {
+      const deployedContract = await this.nerveContract.deployed();
+        const Dare = await deployedContract.getActiveDareName.call(this.JoinDareModel.selectedPool);
+        this.DareInfoModel.Dare = Dare;
+        const player = await deployedContract.getActiveDarePlayer.call(this.JoinDareModel.selectedPool);
+        this.DareInfoModel.player = player;    
+        const NbWatchers = await deployedContract.getActiveDareNBwatchers.call(this.JoinDareModel.selectedPool);
+        this.DareInfoModel.NbWatchers = NbWatchers; 
+        const TotalAmount = await deployedContract.getActiveDareAmount.call(this.JoinDareModel.selectedPool);
+        this.DareInfoModel.TotalAmount = TotalAmount;  
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error loading your active pools; see log.');
+    }
+  }
+  setbetamount(e) {
+    console.log('Setting BetAmount: ' + e.target.value);
+    this.DareMeModel.BetAmount = e.target.value;
+  }
+  async GetDareKey(_dare:string){
+    console.log('Trying to load Dare key !!');
+    try {
+      const deployedContract = await this.nerveContract.deployed();
+        const key = await deployedContract.getDareKey.call(_dare);  
+        this.DareMeModel.DareKey = key; 
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error loading dares key; see log.');
+    }
+  }
+  async DareMe(){
+    if (!this.nerveContract) {
+      this.setStatus('Contract is not loaded, unable to send transaction');
+      return;
+    }
+    this.setStatus('Initiating transaction... (please wait)');
+    try {
+      const deployedContract = await this.nerveContract.deployed();
+      const transaction = await deployedContract.dareMe.sendTransaction(this.DareMeModel.BetAmount,this.DareMeModel.DareKey,{from: this.model.account});
+      if (!transaction) {
+        this.setStatus('Transaction failed!'+transaction);
+      } else {
+        this.setStatus('Transaction complete!'+transaction);
+      }
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error creating Pool; see log.');
+    }
+  }
+  
+
+  
+  
+
 
  
 
