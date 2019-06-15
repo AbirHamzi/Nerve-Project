@@ -47,7 +47,8 @@
   <h5>Current nb watchers:</h5> {{DareInfoModel.NbWatchers}}
   <h5>Dare to play: </h5>{{DareInfoModel.Dare}}
   <h5>proof link : </h5>https://ipfs.io/ipfs/{{DareInfoModel.Proof}}
-
+  <button mat-button id="vote" (click)="vote(true)"><h5>ACCEPT PROOF</h5></button>
+  <button mat-button id="vote" (click)="vote(false)"><h5>CONTEST PROOF</h5></button>
 </mat-card>
 <mat-card *ngIf="ShowCreatePool">
        

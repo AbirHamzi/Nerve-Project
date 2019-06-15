@@ -20,9 +20,12 @@ export class MetaSenderComponent implements OnInit {
   users : any;
   pools : any;
   proofID:any;
-  selectedActiveDare : any;
-  selectedDare : any;
+  Vote : boolean;
   Activepools : any;
+  selectedModel = {
+    selectedActiveDare : 0,
+    selectedDare : 0
+  }
   model = {
     amount: 0,
     receiver: '',
@@ -73,6 +76,11 @@ export class MetaSenderComponent implements OnInit {
             console.log('Transfer event came in, refreshing balance');
             this.refreshBalance();
             this.getDares();
+          });
+          deployed.proofUpdated({}, (err, ev) => {
+            console.log('proofUpdated event came in, refreshing balance');
+            deployed.distributePrizes.sendTransaction({from: this.model.account});
+            this.refreshBalance();
           });
         });
 
@@ -267,15 +275,15 @@ setPlayer(address:string){
     console.log('Trying to load INFOs !!');
     try {
       const deployedContract = await this.nerveContract.deployed();
-        const Dare = await deployedContract.getActiveDareName.call(this.selectedDare);
+        const Dare = await deployedContract.getActiveDareName.call(this.selectedModel.selectedDare);
         this.DareInfoModel.Dare = Dare;
-        const player = await deployedContract.getActiveDarePlayer.call(this.selectedDare);
+        const player = await deployedContract.getActiveDarePlayer.call(this.selectedModel.selectedDare);
         this.DareInfoModel.player = player;    
-        const NbWatchers = await deployedContract.getActiveDareNBwatchers.call(this.selectedDare);
+        const NbWatchers = await deployedContract.getActiveDareNBwatchers.call(this.selectedModel.selectedDare);
         this.DareInfoModel.NbWatchers = NbWatchers; 
-        const TotalAmount = await deployedContract.getActiveDareAmount.call(this.selectedDare);
+        const TotalAmount = await deployedContract.getActiveDareAmount.call(this.selectedModel.selectedDare);
         this.DareInfoModel.TotalAmount = TotalAmount; 
-        const proof = await deployedContract.getActiveDareProof.call(this.selectedDare);
+        const proof = await deployedContract.getActiveDareProof.call(this.selectedModel.selectedDare);
         this.DareInfoModel.Proof = proof;   
     } catch (e) {
       console.log(e);
@@ -322,10 +330,10 @@ setPlayer(address:string){
     this.proofID = e.target.value;
   }
   SelectedActiveDare(poolId:number){
-    this.selectedActiveDare = poolId;
+    this.selectedModel.selectedActiveDare = poolId;
   }
   SelectedDare(poolId:number){
-    this.selectedDare = poolId;
+    this.selectedModel.selectedDare = poolId;
   }
   async setProof(){
     if (!this.nerveContract) {
@@ -335,7 +343,7 @@ setPlayer(address:string){
     this.setStatus('Initiating transaction... (please wait)');
     try {
       const deployedContract = await this.nerveContract.deployed();
-      const transaction = await deployedContract.setProof.sendTransaction(this.selectedDare,this.proofID,{from: this.model.account});
+      const transaction = await deployedContract.setProof.sendTransaction(this.selectedModel.selectedActiveDare,this.proofID,{from: this.model.account});
       if (!transaction) {
         this.setStatus('Transaction failed!'+transaction);
       } else {
@@ -346,8 +354,26 @@ setPlayer(address:string){
       this.setStatus('Error setting proof; see log.');
     }
   }
-  
-
+ 
+async vote(_vote:boolean){
+  if (!this.nerveContract) {
+    this.setStatus('Contract is not loaded, unable to send transaction');
+    return;
+  }
+  this.setStatus('Initiating transaction... (please wait)');
+  try {
+    const deployedContract = await this.nerveContract.deployed();
+    const transaction = await deployedContract.vote.sendTransaction(this.selectedModel.selectedDare,_vote,{from: this.model.account});
+    if (!transaction) {
+      this.setStatus('Transaction failed!'+transaction);
+    } else {
+      this.setStatus('Transaction complete!'+transaction);
+    }
+  } catch (e) {
+    console.log(e);
+    this.setStatus('Error setting proof; see log.');
+  }
+}
 
  
 

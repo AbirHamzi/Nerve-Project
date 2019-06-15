@@ -7,6 +7,7 @@ import { AppComponent } from './app.component';
 import {MetaModule} from './meta/meta.module';
 import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {MatRadioModule} from '@angular/material'
 import {
   MatButtonModule,
   MatCardModule,
@@ -30,7 +31,8 @@ import {
     BrowserModule,
     FormsModule,
     HttpClientModule,
-    MetaModule
+    MetaModule,
+    MatRadioModule
   ],
   providers: [],
   bootstrap: [AppComponent]
