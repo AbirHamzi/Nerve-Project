@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Web3Service} from '../../util/web3.service';
 import { MatSnackBar } from '@angular/material';
+import { NumberValueAccessor } from '@angular/forms/src/directives';
 
 declare let require: any;
 const NerveAbi = require('../../../../build/contracts/game.json');
@@ -18,6 +19,9 @@ export class MetaSenderComponent implements OnInit {
   key : number;
   users : any;
   pools : any;
+  proofID:any;
+  selectedActiveDare : any;
+  selectedDare : any;
   Activepools : any;
   model = {
     amount: 0,
@@ -46,7 +50,8 @@ export class MetaSenderComponent implements OnInit {
     NbWatchers: 0,
     TotalAmount: 0,
     player: '',
-    Dare : ''
+    Dare : '',
+    Proof : ''
   };
 
   status = '';
@@ -262,14 +267,16 @@ setPlayer(address:string){
     console.log('Trying to load INFOs !!');
     try {
       const deployedContract = await this.nerveContract.deployed();
-        const Dare = await deployedContract.getActiveDareName.call(this.JoinDareModel.selectedPool);
+        const Dare = await deployedContract.getActiveDareName.call(this.selectedDare);
         this.DareInfoModel.Dare = Dare;
-        const player = await deployedContract.getActiveDarePlayer.call(this.JoinDareModel.selectedPool);
+        const player = await deployedContract.getActiveDarePlayer.call(this.selectedDare);
         this.DareInfoModel.player = player;    
-        const NbWatchers = await deployedContract.getActiveDareNBwatchers.call(this.JoinDareModel.selectedPool);
+        const NbWatchers = await deployedContract.getActiveDareNBwatchers.call(this.selectedDare);
         this.DareInfoModel.NbWatchers = NbWatchers; 
-        const TotalAmount = await deployedContract.getActiveDareAmount.call(this.JoinDareModel.selectedPool);
-        this.DareInfoModel.TotalAmount = TotalAmount;  
+        const TotalAmount = await deployedContract.getActiveDareAmount.call(this.selectedDare);
+        this.DareInfoModel.TotalAmount = TotalAmount; 
+        const proof = await deployedContract.getActiveDareProof.call(this.selectedDare);
+        this.DareInfoModel.Proof = proof;   
     } catch (e) {
       console.log(e);
       this.setStatus('Error loading your active pools; see log.');
@@ -310,8 +317,35 @@ setPlayer(address:string){
     }
   }
   
-
-  
+  setProofId(e) {
+    console.log('Setting proof is: ' + e.target.value);
+    this.proofID = e.target.value;
+  }
+  SelectedActiveDare(poolId:number){
+    this.selectedActiveDare = poolId;
+  }
+  SelectedDare(poolId:number){
+    this.selectedDare = poolId;
+  }
+  async setProof(){
+    if (!this.nerveContract) {
+      this.setStatus('Contract is not loaded, unable to send transaction');
+      return;
+    }
+    this.setStatus('Initiating transaction... (please wait)');
+    try {
+      const deployedContract = await this.nerveContract.deployed();
+      const transaction = await deployedContract.setProof.sendTransaction(this.selectedDare,this.proofID,{from: this.model.account});
+      if (!transaction) {
+        this.setStatus('Transaction failed!'+transaction);
+      } else {
+        this.setStatus('Transaction complete!'+transaction);
+      }
+    } catch (e) {
+      console.log(e);
+      this.setStatus('Error setting proof; see log.');
+    }
+  }
   
 
 

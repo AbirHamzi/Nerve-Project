@@ -22,16 +22,33 @@
 <mat-card>
   <mat-card-header><h2>Try Nerve</h2></mat-card-header>
   <mat-card-content>
-    <button mat-button id="play" (click)="ShowPlayHandler=true;ShowWatchHandler=false;ShowJoinPool=false;ShowCreatePool=false;getMyActiveDares();getDares()"><h5>PLAY</h5></button>
-    <button mat-button id="watch" (click)="ShowWatchHandler=true;ShowPlayHandler=false;getMyActiveDares()"><h5>WATCH</h5></button>
+    <button mat-button id="play" (click)="ShowVoting=false;ShowPlayHandler=true;ShowWatchHandler=false;ShowJoinPool=false;ShowCreatePool=false;getMyActiveDares();getDares()"><h5>PLAY</h5></button>
+    <button mat-button id="watch" (click)="ShowWatchHandler=true;ShowSetProof=false;ShowPlayHandler=false;getMyActiveDares()"><h5>WATCH</h5></button>
   </mat-card-content>
 </mat-card>
 
 <mat-card *ngIf="ShowWatchHandler">
-    <button mat-button id="Create PrizePool" (click)="ShowCreatePool=true;ShowJoinPool=false;getDares();getUsers()"><h5>DARE SOMEONE</h5></button>
-    <button mat-button id="Join PrizePool" (click)="ShowJoinPool=true;ShowCreatePool=false;getActiveDares()"><h5>JOIN ACTIVE DARES</h5></button>
+    <button mat-button id="Create PrizePool" (click)="ShowVoting=false;ShowSetProof=false;ShowCreatePool=true;ShowJoinPool=false;getDares();getUsers()"><h5>DARE SOMEONE</h5></button>
+    <button mat-button id="Join PrizePool" (click)="ShowVoting=false;ShowSetProof=false;ShowJoinPool=true;ShowCreatePool=false;getActiveDares()"><h5>JOIN ACTIVE DARES</h5></button>
+    <button mat-button id="vote dare" (click)="ShowVoting=true;ShowSetProof=false;ShowJoinPool=false;ShowCreatePool=false;getActiveDares()"><h5>VOTE DARES</h5></button>
 </mat-card>
 
+<mat-card *ngIf="ShowVoting">
+  <h4>Active Dares:</h4>
+  <mat-card-content>
+    <mat-select name="pools"  placeholder="select an active pool">
+      <mat-option *ngFor="let pool of pools" [value]="pool" (onSelectionChange)="SelectedDare(pool.PoolID)">{{pool}}</mat-option>
+    </mat-select>
+  </mat-card-content>
+
+  <button mat-button id="get dare infos" (click)="getDareInfo()"><h5>GET DARE INFOS</h5></button>
+  <h5>Target PLayer: </h5> {{DareInfoModel.player}}
+  <h5>Current PrizePool Amount: </h5>{{DareInfoModel.TotalAmount}}
+  <h5>Current nb watchers:</h5> {{DareInfoModel.NbWatchers}}
+  <h5>Dare to play: </h5>{{DareInfoModel.Dare}}
+  <h5>proof link : </h5>https://ipfs.io/ipfs/{{DareInfoModel.Proof}}
+
+</mat-card>
 <mat-card *ngIf="ShowCreatePool">
        
     <h4>Dare Type:</h4>
@@ -98,5 +115,15 @@
   
   </mat-card>
   <mat-card *ngIf="ShowSetProof">
-   
+    <mat-card-content>
+      <h4>Your Active Dares :</h4>
+    <mat-select name="pools"  placeholder="Your active Dares">
+      <mat-option *ngFor="let Apool of Activepools" [value]="Apool" (onSelectionChange)="SelectedActiveDare(Apool.PoolID)">{{Apool}}</mat-option>
+    </mat-select>
+    <h4>IPFS ID of the proof:</h4>
+    <mat-form-field>
+      <input type="text" matInput id="proof" placeholder="Set your proof" (change)="setProofId($event)">
+  </mat-form-field>
+    <button mat-button id="set proof" (click)="setProof()"><h5>Set Proof</h5></button>
+  </mat-card-content>
   </mat-card>

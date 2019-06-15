@@ -26,6 +26,7 @@ contract game is Ownable{
         string ProofID; // IPFS ID of the proof
         uint DareKey;
         uint NbWatchers;
+        bool state;
     }
      
     /************************************* Arrays ***************************************/
@@ -38,6 +39,7 @@ contract game is Ownable{
     
     mapping(uint => User) public Users;
     uint[] UsersKeyList;
+    address payable[] public users;
    /* mapping(uint => PrizePool) PrizePools;
     uint[] PoolsKeyList;*/
     PrizePool[] PrizePools;
@@ -171,6 +173,7 @@ contract game is Ownable{
         _Pool.TotalAmount +=_BetAmount;
         _Pool.DareKey = _DareKey;
         _Pool.NbWatchers ++;
+        _Pool.state = true;
         //store the new prizepool
          PrizePools.push(_Pool);
          PoolKey[_Pool.PoolID] = _Pool;
@@ -206,6 +209,7 @@ contract game is Ownable{
         _Pool.PoolID = PrizePools.length;
         _Pool.TotalAmount +=_BetAmount;
         _Pool.DareKey = _DareKey;
+        _Pool.state = true;
         //store the new prizepool
          PrizePools.push(_Pool);
          PoolKey[PrizePools.length] = _Pool;
@@ -262,6 +266,15 @@ contract game is Ownable{
        }
        return _totalAMount;
      } 
+       function getActiveDareProof(uint _pool) public view returns(string memory){
+        string memory _proof;
+        for(uint i = 0; i < PrizePools.length; i++){
+           if(PrizePools[i].PoolID == _pool){
+              _proof = PrizePools[i].ProofID;
+           }
+       }
+       return _proof;
+     } 
        function getActiveDareNBwatchers(uint _pool) public view returns(uint){
         uint _nbWatchers;
         for(uint i = 0; i < PrizePools.length; i++){
@@ -272,6 +285,75 @@ contract game is Ownable{
        return _nbWatchers;
      } 
 
+  
+    function updateProof(PrizePool[] storage _pools,uint _poolID,string memory _ipfsID)internal {
+        
+           for(uint i = 0; i < PrizePools.length; i++){
+             if(_pools[i].PoolID == _poolID){
+               _pools[i].ProofID = _ipfsID;
+                _pools[i].state = false;
+              }
+            }
+    }
+    
+    function setProof(uint _poolID,string memory _ipfsID)public payable returns(bool){
+        updateProof(PrizePools,_poolID,_ipfsID);
+        emit proofUpdated(_poolID,_ipfsID);
+        return true;
+
+    }
+    function getProof(uint _poolID)public view returns(string memory){
+        for(uint i = 0; i < PrizePools.length; i++){
+             if(PrizePools[i].PoolID == _poolID){
+               return PrizePools[i].ProofID ;
+              }
+            }
+    }
+    function vote(uint _poolID,bool _vote)public payable returns(bool) {
+
+          updateVote(watcherInfo[msg.sender],_vote);
+          //emit voteUpdated();
+          return true;
+    }
+    function updateVote(Watcher storage _watcher,bool _vote)internal {
+             _watcher.vote = _vote;
+    }
+    function AdminVote(uint  _poolId)internal returns(bool){
+        return true;
+    }
+    function distributePrizes(uint _poolID) public payable returns(bool){
+        bool _closedGame=true;
+        uint _nbVote=0;
+        uint part=0;
+        for(uint i = 0; i < PrizePools.length; i++){
+            if((PrizePools[i].PoolID == _poolID)&&(PrizePools[i].state == false))
+               _closedGame=false;
+              
+        }
+        if(!_closedGame){
+            for(uint i = 0; i < watchers.length; i++){ 
+              if(watcherInfo[watchers[i]].vote == true) 
+                  _nbVote++;
+            }
+        }
+        if((_nbVote > watchers.length/2)||(AdminVote(_poolID))){
+            for(uint i = 0; i < users.length; i++){ 
+              if(PLayedDare[users[i]].PoolID == _poolID) 
+                  users[i].transfer(PLayedDare[users[i]].TotalAmount);
+            }
+        }
+        else{
+          for(uint i = 0; i < users.length; i++){ 
+             if(PLayedDare[users[i]].PoolID == _poolID)
+                part=PLayedDare[users[i]].TotalAmount/watchers.length;
+          }
+          for(uint i = 0; i < watchers.length; i++){ 
+               watchers[i].transfer(part);
+            }
+        }
+           
+    } 
+
     function getBalance() public view returns(uint){
          return (msg.sender.balance);
     }
@@ -280,26 +362,6 @@ contract game is Ownable{
         emit transferFund(msg.sender,_reciever,msg.value);
         return true;
     }
-    function updateProof(PrizePool[] storage _pools,uint _poolID,string memory _ipfsID)internal {
-        
-           for(uint i = 0; i < PrizePools.length; i++){
-             if(_pools[i].PoolID == _poolID){
-               _pools[i].ProofID = _ipfsID;
-              }
-            }
-    }
-    function setProof(uint _poolID,string memory _ipfsID)public payable returns(bool){
-        updateProof(PrizePools,_poolID,_ipfsID);
-        emit proofUpdated(_poolID,_ipfsID);
-        return true;
-
-    }
-    function getProof()public view returns(string memory){
-
-    }
-    function distributePrizes() public {
-
-    } 
         // Fallback function in case someone sends ether to the contract so it doesn't get lost and to increase the treasury of this contract that will be distributed in each game
     function() external payable {}
 }
